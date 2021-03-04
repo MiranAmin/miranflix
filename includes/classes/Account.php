@@ -1,0 +1,67 @@
+<?php
+
+class Account {
+
+    private $con;
+    private $errorArray = array();
+
+    public function __construct($con) {
+        $this->con = $con;
+    }
+
+
+    public function register($fn, $ln, $un, $em, $em2, $pw, $pw2) {
+        $this->validateFirstName($fn);
+        $this->validateLastName($ln);
+        $this->validateUsername($un);
+        $this->validateEmail($em, $em2);
+
+
+        
+    }
+
+
+    private function validateFirstName($fn) {
+        if(strlen($fn) < 2 || strlen($fn) > 25 ) {
+            array_push($this->errorArray, Constants::$firstNameError);
+        }
+    }
+
+    private function validateLastName($ln) {
+        if(strlen($ln) < 2 || strlen($ln) > 25 ) {
+            array_push($this->errorArray, Constants::$lastNameError);
+        }
+    }
+
+    private function validateUsername($un) {
+        if(strlen($un) < 2 || strlen($un) > 25 ) {
+            array_push($this->errorArray, Constants::$usernameError);
+            return;
+        }
+
+        $query = $this->con->prepare("SELECT * FROM users WHERE username=:un");
+        $query->bindValue(":un", $un);
+
+        $query->execute();
+
+        if($query->rowCount() != 0) {
+            array_push($this->errorArray, Constants::$usernameTaken);
+        }
+
+    }
+
+    public function validateEmail($em, $em2) {
+        if($em !== $em2) {
+            array_push($this->errorArray, Constants::$emailsDontMatch);
+        }
+    }
+
+    public function getError($error) {
+        if(in_array($error, $this->errorArray)) {
+            return $error;
+        }
+    }
+
+
+}
+?>
