@@ -33,6 +33,7 @@ class Account {
         }
     }
 
+    //Can breakout the query area of this function into another for reuse. its repeated code
     private function validateUsername($un) {
         if(strlen($un) < 2 || strlen($un) > 25 ) {
             array_push($this->errorArray, Constants::$usernameError);
@@ -50,10 +51,26 @@ class Account {
 
     }
 
+    //Can breakout the query area of this function into another for reuse. its repeated code
     public function validateEmail($em, $em2) {
         if($em !== $em2) {
             array_push($this->errorArray, Constants::$emailsDontMatch);
         }
+
+        if(!filter_var($em, FILTER_VALIDATE_EMAIL)) {
+            array_push($this->errorArray, Constants::$emailInvalid);
+            return;
+        }
+        
+        $query = $this->con->prepare("SELECT * FROM users WHERE email=:em");
+        $query->bindValue(":em", $em);
+
+        $query->execute();
+
+        if($query->rowCount() != 0) {
+            array_push($this->errorArray, Constants::$emailTaken);
+        }
+        
     }
 
     public function getError($error) {
