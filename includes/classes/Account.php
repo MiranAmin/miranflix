@@ -16,7 +16,7 @@ class Account {
         $this->validatePasswords($pw, $pw2);
 
         if(empty($this->errorArray)) {
-           return $this->insertUserDetails($fn, $ln, $un, $em, $pw);
+            return $this->insertUserDetails($fn, $ln, $un, $em, $pw);
         }
 
         return false;
@@ -24,9 +24,11 @@ class Account {
 
     public function login($un, $pw) {
         $pw = hash("sha512", $pw);
+
         $query = $this->con->prepare("SELECT * FROM users WHERE username=:un AND password=:pw");
         $query->bindValue(":un", $un);
         $query->bindValue(":pw", $pw);
+
         $query->execute();
 
         if($query->rowCount() == 1) {
@@ -38,9 +40,11 @@ class Account {
     }
 
     private function insertUserDetails($fn, $ln, $un, $em, $pw) {
+        
         $pw = hash("sha512", $pw);
+        
         $query = $this->con->prepare("INSERT INTO users (firstName, lastName, username, email, password)
-                                    VALUES (:fn, :ln, :un, :em, :pw)");
+                                        VALUES (:fn, :ln, :un, :em, :pw)");
         $query->bindValue(":fn", $fn);
         $query->bindValue(":ln", $ln);
         $query->bindValue(":un", $un);
@@ -48,7 +52,6 @@ class Account {
         $query->bindValue(":pw", $pw);
 
         return $query->execute();
-
     }
 
     private function validateFirstName($fn) {
